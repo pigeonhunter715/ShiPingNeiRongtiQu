@@ -9,44 +9,122 @@
   <body>
     <main class="shell">
       <header class="topbar">
-        <div>
-          <h1>B站视频内容检索</h1>
-          <p>批量导入公开视频字幕，按关键词跳到具体时间点。</p>
+        <div class="brand-block">
+          <span class="app-mark">B</span>
+          <div>
+            <h1>B站视频内容检索</h1>
+            <p>批量导入公开视频字幕，搜索、转写、总结都在本地完成。</p>
+          </div>
         </div>
-        <button id="refreshVideos" class="icon-button" title="刷新视频库">↻</button>
+        <div class="topbar-actions">
+          <span id="jobBadge" class="badge">等待任务</span>
+          <button id="refreshVideos" class="icon-button" title="刷新视频库">↻</button>
+        </div>
       </header>
 
-      <section class="panel import-panel">
-        <div class="section-head">
-          <h2>导入</h2>
-          <span id="jobBadge" class="badge">等待任务</span>
-        </div>
-        <textarea id="importText" placeholder="每行一个 B站链接或 BV号&#10;https://www.bilibili.com/video/BV...&#10;BV..."></textarea>
-        <div class="actions">
-          <button id="startImport" class="primary">开始导入</button>
-          <span id="importHint"></span>
-        </div>
-        <div id="jobLog" class="job-log"></div>
+      <section class="workspace-grid">
+        <section class="panel import-panel">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Import</p>
+              <h2>导入视频</h2>
+            </div>
+          </div>
+          <textarea id="importText" placeholder="每行一个 B站链接或 BV号&#10;https://www.bilibili.com/video/BV...&#10;BV..."></textarea>
+          <div class="actions">
+            <button id="startImport" class="primary">开始导入</button>
+            <span id="importHint"></span>
+          </div>
+          <div id="jobLog" class="job-log"></div>
+        </section>
+
+        <section class="panel search-panel">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Search</p>
+              <h2>搜索内容</h2>
+            </div>
+            <span id="searchCount" class="badge">0 条结果</span>
+          </div>
+          <form id="searchForm" class="search-form">
+            <input id="searchInput" autocomplete="off" placeholder="输入字幕关键词，例如：机器学习" />
+            <button class="primary" type="submit">搜索</button>
+          </form>
+          <div id="searchResults" class="results empty">输入关键词后开始搜索。</div>
+        </section>
       </section>
 
-      <section class="panel search-panel">
+      <section class="panel config-panel">
         <div class="section-head">
-          <h2>搜索</h2>
-          <span id="searchCount" class="badge">0 条结果</span>
+          <h2>配置与依赖</h2>
+          <span class="badge subtle-badge">本地配置</span>
         </div>
-        <form id="searchForm" class="search-form">
-          <input id="searchInput" autocomplete="off" placeholder="输入字幕关键词，例如：机器学习" />
-          <button class="primary" type="submit">搜索</button>
-        </form>
-        <div id="searchResults" class="results empty">输入关键词后开始搜索。</div>
+        <div id="openaiKeyStatus" class="asr-status">正在读取 OpenAI Key 配置...</div>
+        <div id="asrStatus" class="asr-status">正在检测转写依赖...</div>
+        <details class="settings-drawer">
+          <summary>OpenAI 与转写配置</summary>
+          <div class="openai-configs">
+            <section class="config-box">
+              <div class="config-title">
+                <strong>总结模型配置</strong>
+                <span id="summaryOpenAIStatus">未配置</span>
+              </div>
+              <div class="config-grid">
+                <label>
+                  API Key
+                  <input id="summaryOpenAIKey" type="password" autocomplete="off" placeholder="sk-..." />
+                </label>
+                <label>
+                  Base URL
+                  <input id="summaryOpenAIBaseUrl" autocomplete="off" placeholder="https://api.example.com/v1" />
+                </label>
+                <label>
+                  模型名
+                  <input id="summaryOpenAIModel" autocomplete="off" placeholder="gpt-5.4-mini" />
+                </label>
+              </div>
+              <div class="config-actions">
+                <button id="saveSummaryOpenAI" class="small-button">保存总结配置</button>
+                <button id="clearSummaryOpenAI" class="small-button">清空总结配置</button>
+              </div>
+            </section>
+            <section class="config-box">
+              <div class="config-title">
+                <strong>转写模型配置</strong>
+                <span id="transcribeOpenAIStatus">未配置</span>
+              </div>
+              <div class="config-grid">
+                <label>
+                  API Key
+                  <input id="transcribeOpenAIKey" type="password" autocomplete="off" placeholder="sk-..." />
+                </label>
+                <label>
+                  Base URL
+                  <input id="transcribeOpenAIBaseUrl" autocomplete="off" placeholder="https://api.example.com/v1" />
+                </label>
+                <label>
+                  模型名
+                  <input id="transcribeOpenAIModel" autocomplete="off" placeholder="whisper-1" />
+                </label>
+              </div>
+              <div class="config-actions">
+                <button id="saveTranscribeOpenAI" class="small-button">保存转写配置</button>
+                <button id="clearTranscribeOpenAI" class="small-button">清空转写配置</button>
+              </div>
+            </section>
+          </div>
+        </details>
       </section>
 
       <section class="panel library-panel">
         <div class="section-head">
-          <h2>视频库</h2>
+          <div>
+            <p class="eyebrow">Library</p>
+            <h2>视频库</h2>
+          </div>
           <span id="videoCount" class="badge">0 个视频</span>
         </div>
-        <div class="toolbar">
+        <div class="toolbar batch-toolbar">
           <label class="select-label">
             转写后端
             <select id="asrBackend">
@@ -58,58 +136,6 @@
           <button id="clearSelection" class="small-button">清空选择</button>
           <button id="transcribeMissing" class="primary" disabled>转写选中视频</button>
         </div>
-        <div class="openai-configs">
-          <section class="config-box">
-            <div class="config-title">
-              <strong>总结模型配置</strong>
-              <span id="summaryOpenAIStatus">未配置</span>
-            </div>
-            <div class="config-grid">
-              <label>
-                API Key
-                <input id="summaryOpenAIKey" type="password" autocomplete="off" placeholder="sk-..." />
-              </label>
-              <label>
-                Base URL
-                <input id="summaryOpenAIBaseUrl" autocomplete="off" placeholder="https://api.example.com/v1" />
-              </label>
-              <label>
-                模型名
-                <input id="summaryOpenAIModel" autocomplete="off" placeholder="gpt-5.4-mini" />
-              </label>
-            </div>
-            <div class="config-actions">
-              <button id="saveSummaryOpenAI" class="small-button">保存总结配置</button>
-              <button id="clearSummaryOpenAI" class="small-button">清空总结配置</button>
-            </div>
-          </section>
-          <section class="config-box">
-            <div class="config-title">
-              <strong>转写模型配置</strong>
-              <span id="transcribeOpenAIStatus">未配置</span>
-            </div>
-            <div class="config-grid">
-              <label>
-                API Key
-                <input id="transcribeOpenAIKey" type="password" autocomplete="off" placeholder="sk-..." />
-              </label>
-              <label>
-                Base URL
-                <input id="transcribeOpenAIBaseUrl" autocomplete="off" placeholder="https://api.example.com/v1" />
-              </label>
-              <label>
-                模型名
-                <input id="transcribeOpenAIModel" autocomplete="off" placeholder="whisper-1" />
-              </label>
-            </div>
-            <div class="config-actions">
-              <button id="saveTranscribeOpenAI" class="small-button">保存转写配置</button>
-              <button id="clearTranscribeOpenAI" class="small-button">清空转写配置</button>
-            </div>
-          </section>
-        </div>
-        <div id="openaiKeyStatus" class="asr-status">正在读取 OpenAI Key 配置...</div>
-        <div id="asrStatus" class="asr-status">正在检测转写依赖...</div>
         <div class="library-groups">
           <section class="library-group">
             <div class="group-head">

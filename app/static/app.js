@@ -99,7 +99,7 @@ function renderJob(job) {
         <div class="job-row">
           <div class="row-title">
             <span>${escapeHtml(title)}</span>
-            <span class="status-${escapeHtml(item.status)}">${statusText(item.status)}</span>
+            <span class="status-pill status-${escapeHtml(item.status)}">${statusText(item.status)}</span>
           </div>
           <div class="meta">${escapeHtml(detail + (item.message || ""))}</div>
         </div>
@@ -189,27 +189,32 @@ function renderVideoGroup(state, data, emptyText) {
 function renderVideoRow(item, state) {
   const title = item.part_title && item.part_title !== item.title ? `${item.title} / ${item.part_title}` : item.title;
   const canView = state === "available";
+  const source = item.transcript_source || item.error || "暂无来源信息";
   return `
     <div class="video-row">
       <div class="row-title">
-        <a href="${escapeHtml(item.url)}" target="_blank" rel="noreferrer">${escapeHtml(title)}</a>
+        <a class="video-title" href="${escapeHtml(item.url)}" target="_blank" rel="noreferrer">${escapeHtml(title)}</a>
         <div class="video-actions">
           ${
             state === "unavailable" && item.status === "no_transcript"
               ? `<label class="select-cell"><input type="checkbox" data-select-transcribe="${item.id}" ${selectedVideoIds.has(item.id) ? "checked" : ""} />选择</label>`
               : ""
           }
-          <span class="status-${escapeHtml(item.status)}">${statusText(item.status)}</span>
-          ${canView ? `<button class="small-button" data-content="${item.id}">查看内容</button>` : `<span class="muted-action">暂无内容</span>`}
+          <span class="status-pill status-${escapeHtml(item.status)}">${statusText(item.status)}</span>
+          ${canView ? `<button class="small-button action-primary" data-content="${item.id}">查看内容</button>` : `<span class="muted-action">暂无内容</span>`}
           ${item.status === "no_transcript" ? `<button class="small-button" data-transcribe="${item.id}">转写</button>` : ""}
           <button class="small-button" data-refresh="${item.id}">刷新</button>
           <button class="small-button danger-button" data-delete="${item.id}" data-title="${escapeHtml(title)}">删除</button>
         </div>
       </div>
-      <div class="meta">
-        ${escapeHtml(item.owner || "未知UP")} · BV ${escapeHtml(item.bvid)} · P${item.page} ·
-        ${item.segment_count} 条字幕 · ASR ${statusText(item.asr_status)} · ${escapeHtml(item.transcript_source || item.error || "")}
+      <div class="meta-grid">
+        <span class="meta-chip">${escapeHtml(item.owner || "未知UP")}</span>
+        <span class="meta-chip">BV ${escapeHtml(item.bvid)}</span>
+        <span class="meta-chip">P${item.page}</span>
+        <span class="meta-chip">${item.segment_count} 条字幕</span>
+        <span class="meta-chip">ASR ${statusText(item.asr_status)}</span>
       </div>
+      <div class="source-line">${escapeHtml(source)}</div>
     </div>
   `;
 }
@@ -408,7 +413,8 @@ async function loadAsrStatus() {
     .map(([name, item]) => {
       const ok = item.ok ? "可用" : "缺少";
       const install = item.ok ? "" : ` · ${escapeHtml(item.install || "")}`;
-      return `<div><strong>${escapeHtml(name)}</strong>：${ok}${install}</div>`;
+      const cls = item.ok ? "status-ready" : "status-failed";
+      return `<div class="${cls}"><strong>${escapeHtml(name)}</strong>：${ok}${install}</div>`;
     })
     .join("");
 }
