@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+data.sqlite3
+data.sqlite3-*
+*.db
+*.sqlite
+*.sqlite3
+
+.env
+.env.*
+*.log
+
+tmp/
+temp/
+downloads/
